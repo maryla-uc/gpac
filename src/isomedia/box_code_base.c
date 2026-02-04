@@ -854,9 +854,14 @@ GF_Err unkn_box_read(GF_Box *s, GF_BitStream *bs)
 	if (! isalnum(sub_a)) e = GF_NOT_SUPPORTED;
 
 	if (e == GF_OK) {
+		u64 parsed_size = s->size;
 		gf_bs_seek(sub_bs, 0);
 		gf_bs_set_cookie(sub_bs, GF_ISOM_BS_COOKIE_NO_LOGS|GF_ISOM_BS_COOKIE_IN_UDTA);
 		e = gf_isom_box_array_read(s, sub_bs);
+		if ((e==GF_OK) && gf_bs_available(sub_bs)) {
+			e = GF_NOT_SUPPORTED;
+		}
+		s->size = parsed_size;
 	}
 	gf_bs_del(sub_bs);
 	if (e==GF_OK) {
