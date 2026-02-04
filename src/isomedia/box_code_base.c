@@ -858,8 +858,19 @@ GF_Err unkn_box_read(GF_Box *s, GF_BitStream *bs)
 		gf_bs_seek(sub_bs, 0);
 		gf_bs_set_cookie(sub_bs, GF_ISOM_BS_COOKIE_NO_LOGS|GF_ISOM_BS_COOKIE_IN_UDTA);
 		e = gf_isom_box_array_read(s, sub_bs);
-		if ((e==GF_OK) && gf_bs_available(sub_bs)) {
-			e = GF_NOT_SUPPORTED;
+		if (e==GF_OK) {
+			if (gf_bs_available(sub_bs)) {
+				e = GF_NOT_SUPPORTED;
+			} else {
+				u32 i;
+				for (i=0; i<gf_list_count(s->child_boxes); i++) {
+					GF_Box *b = (GF_Box *)gf_list_get(s->child_boxes, i);
+					if ((b->type == GF_QT_BOX_TYPE_WIDE) || (b->type == GF_ISOM_BOX_TYPE_MDAT)) {
+						e = GF_NOT_SUPPORTED;
+						break;
+					}
+				}
+			}
 		}
 		s->size = parsed_size;
 	}
