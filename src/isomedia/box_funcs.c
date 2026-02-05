@@ -1995,6 +1995,22 @@ GF_Box *gf_isom_box_new_ex(u32 boxType, u32 parentType, Bool skip_logs, Bool is_
 		if (is_uuid || (boxType==GF_ISOM_BOX_TYPE_UUID)) {
 			a = uuid_box_new();
 			if (a) a->registry = &box_registry[1];
+		} else if (parentType == GF_ISOM_BOX_TYPE_STSD) {
+			s32 gnrm_idx = get_box_reg_idx(GF_ISOM_BOX_TYPE_GNRM, parentType, 0);
+			if (gnrm_idx) {
+				a = box_registry[gnrm_idx].new_fn();
+				if (a) {
+					((GF_GenericSampleEntryBox *)a)->EntryType = boxType;
+					a->registry = &box_registry[gnrm_idx];
+				}
+			} else {
+				a = unkn_box_new();
+				if (a) {
+					((GF_UnknownBox *)a)->original_4cc = boxType;
+					((GF_UnknownBox *)a)->parent_4cc = parentType;
+					a->registry = &box_registry[0];
+				}
+			}
 		} else {
 			a = unkn_box_new();
 			if (a) {
