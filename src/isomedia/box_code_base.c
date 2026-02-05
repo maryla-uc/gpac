@@ -1602,6 +1602,16 @@ GF_Box *gnrm_box_new()
 //dummy
 GF_Err gnrm_box_read(GF_Box *s, GF_BitStream *bs)
 {
+	GF_GenericSampleEntryBox *ptr = (GF_GenericSampleEntryBox *)s;
+	GF_Err e = gf_isom_base_sample_entry_read((GF_SampleEntryBox *)s, bs);
+	if (e) return e;
+	ISOM_DECREASE_SIZE(ptr, 8)
+	if (ptr->size) {
+		ptr->data_size = (u32) ptr->size;
+		ptr->data = (char*)gf_malloc(ptr->data_size * sizeof(char));
+		if (!ptr->data) return GF_OUT_OF_MEM;
+		gf_bs_read_data(bs, ptr->data, ptr->data_size);
+	}
 	return GF_OK;
 }
 
@@ -1652,6 +1662,15 @@ GF_Box *gnrv_box_new()
 //dummy
 GF_Err gnrv_box_read(GF_Box *s, GF_BitStream *bs)
 {
+	GF_GenericVisualSampleEntryBox *ptr = (GF_GenericVisualSampleEntryBox *)s;
+	GF_Err e = gf_isom_video_sample_entry_read((GF_VisualSampleEntryBox *)ptr, bs);
+	if (e) return e;
+	if (ptr->size) {
+		ptr->data_size = (u32) ptr->size;
+		ptr->data = (char*)gf_malloc(ptr->data_size * sizeof(char));
+		if (!ptr->data) return GF_OUT_OF_MEM;
+		gf_bs_read_data(bs, ptr->data, ptr->data_size);
+	}
 	return GF_OK;
 }
 
@@ -1705,6 +1724,15 @@ GF_Box *gnra_box_new()
 //dummy
 GF_Err gnra_box_read(GF_Box *s, GF_BitStream *bs)
 {
+	GF_GenericAudioSampleEntryBox *ptr = (GF_GenericAudioSampleEntryBox *)s;
+	GF_Err e = gf_isom_audio_sample_entry_read((GF_AudioSampleEntryBox *)ptr, bs);
+	if (e) return e;
+	if (ptr->size) {
+		ptr->data_size = (u32) ptr->size;
+		ptr->data = (char*)gf_malloc(ptr->data_size * sizeof(char));
+		if (!ptr->data) return GF_OUT_OF_MEM;
+		gf_bs_read_data(bs, ptr->data, ptr->data_size);
+	}
 	return GF_OK;
 }
 #ifndef GPAC_DISABLE_ISOM_WRITE
